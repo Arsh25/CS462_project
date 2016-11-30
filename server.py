@@ -9,6 +9,7 @@ import BaseHTTPServer
 import json
 import threading
 import argparse
+from datetime import datetime
 
 
 import log_parser
@@ -20,7 +21,10 @@ def parse_auth_log(seconds):
 		with open('auth_log_ips','w') as ip_file:
 			ip_file.write(json.dumps(ip_addresses))
 		ip_file.closed
-		self_timer = threading.Timer(seconds,parse_auth_log)
+		with open('logs/update.log','a') as parser_log:
+			parser_log.write("Ran parse_auth_log at: " + str(datetime.now())+'\n')
+		parser_log.closed
+		self_timer = threading.Timer(seconds,parse_auth_log,args=[seconds])
 		self_timer.start()
 	
 class web_logger_handler(BaseHTTPServer.BaseHTTPRequestHandler):
