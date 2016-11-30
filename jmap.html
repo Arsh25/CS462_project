@@ -82,6 +82,25 @@
 		}
 	}
 
+	function getDataFromServer()
+	{
+		var req = new XMLHttpRequest();
+		req.onreadystatechange = function()
+		{
+			if (req.readyState == 4 && req.status == 200)
+			{
+				var ip_addresses = JSON.parse(req.responseText);
+				for (var i=0;i<ip_addresses.length;i++)
+				{	
+						ip_addresses[i] = ip_addresses[i].trim();
+						document.getElementById('ip-entry').value += '\n'+ip_addresses[i];
+				}
+			}
+		}
+		req.open("GET","/live",true);
+		req.send(null);
+	}
+
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhnrIGWrpbVrXScHPEg_nQ8TlwB7Ego0E&callback=initMap"
     async defer></script>
@@ -89,8 +108,10 @@
     Paste the output in this textbox and press Process IPs<br>
 	<textarea name="ip-entry" id="ip-entry" cols="15" rows="10" value="8.8.8.8"></textarea><br>
 	<button id="processIPs">Process IPs</button>
+	<button id="getLiveData">Get Live data from server</button>
 	<script>
 		document.getElementById('processIPs').addEventListener('click',function(){parseIPs()});
+		document.getElementById('getLiveData').addEventListener('click',getDataFromServer);
 	</script>
   </body>
 </html>
