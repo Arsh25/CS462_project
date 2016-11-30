@@ -2,16 +2,16 @@
 
 # log_parser.py: Parse various Unix log files 
 # 11/10/2016
-# Last Edited: 11/10/2016
+# Last Edited: 11/29/2016
 
 # Pre: fileName is a valid auth.log file
 # Post: Returns
-#	attacks: Dictionary where key is atatcker IP and value is user attempted to login as
+#	attacks: Unique IP's with invalid login attempts 
 #	invalid_users: array of users with attempted login that do not exist on system   
 def parse_auth_log(fileName):
 	with open(fileName) as log_file:
 		auth_log = log_file.readlines()
-		attacks = {}
+		attacks = []
 		invalid_users = []
 		for line in auth_log:
 			#print(line)
@@ -23,7 +23,8 @@ def parse_auth_log(fileName):
 				if invalid_user != -1: # Find invalid users that attackers tried to login as
 					invalid_username = line[invalid_user+len("invalid user"):line.find("from")]
 					invalid_users.append(invalid_username)
-				attacks[ip] = user
+				if ip not in attacks:
+					attacks.append(ip)
 		return attacks, invalid_users
 
 if __name__ == '__main__':
