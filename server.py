@@ -35,7 +35,11 @@ class web_logger_handler(BaseHTTPServer.BaseHTTPRequestHandler):
 			server_log.write("Invalid URL visited: "+self.path+"\n");
 			self.send_response(404)
 			self.send_header('Content-type','text/html')
-			self.wfile.write('<html><h1>404: Page Not Found</h1></html>')
+			self.end_headers()
+			self.wfile.write('<html><head></head><body><h1>404 Page Not Found\
+							 <br> \
+							 <img src="http://thecatapi.com/api/images/get?format=src&type=gif"\>\
+							 <br> </h1><a href="/">Home Page</a> </body></html>')
 			self.wfile.close()
 
 
