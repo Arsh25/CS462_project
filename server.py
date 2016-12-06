@@ -10,6 +10,7 @@ import BaseHTTPServer
 import json
 import threading
 import argparse
+import socket
 from datetime import datetime
 from geoip import geolite2
 
@@ -24,11 +25,13 @@ def parse_auth_log(log_file,seconds):
 			for attack in attacks:
 				if attack not in ip_file:
 					ip = attack['ip'].strip()
-					ip = "'"+ip+"'"
-					#print(ip)
-					geo_data = geolite2.lookup(ip)
-					print(geo_data)
-					ip_file.write(str(attack)+'\n')			
+					# ip = "'"+ip+"'"
+					if ip != '':
+						socket.inet_aton(ip)
+						#print(ip)
+						geo_data = geolite2.lookup(ip)
+						print(geo_data)
+						ip_file.write(str(attack)+'\n')			
 		ip_file.closed
 		with open('logs/update.log','a') as parser_log:
 			parser_log.write("Ran parse_auth_log at: " + str(datetime.now())+'\n')
