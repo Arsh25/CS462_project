@@ -6,19 +6,26 @@ html, body {
 body {
 	bottom-margin: 100px;
 }
-table {
-    width: 40%;
-    float: center;
+.tables {
+	width:50%;
     margin: 0 auto;
-    
+}
+table {
+	/*float:center;*/
+    width: 28%;
+}
+#top-ips {
+	float:left;
+	margin-left:20%;
+}
+#top-users {
+	float:right;
+	margin-right:20%;
 }
 td, tr, th {
     text-align: center;
     padding: 10px 5px;
 }
-/*tr:nth-child:(even) {
-	background: #B5E8FF;
-}*/
 tr:nth-child(odd) {
 	background: #B5E8FF
 }
@@ -26,8 +33,12 @@ tr:nth-child(1) {
 	background: #2BAEEB
 }
 #map {
-	width: calc(100% - 160px);
-	height: calc(100% - 160px);
-	padding: 80px 0 0 80px;
-	margin-bottom:80px;
+	/*width: calc(100% - 160px);*/
+	/*height: calc(100% - 160px);*/
+	width:90%;
+	height:90%;
+	padding: 5% 0 0 5%;
+	margin-bottom:50px;
 }
+/*table { border: 1px solid black;float:left;width:148px;}*/
+ /*#table_container{width:300px;margin:0 auto;}*/

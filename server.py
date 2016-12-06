@@ -33,7 +33,7 @@ class web_logger_handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 	def do_GET(self):
 		if self.path =='/':
-			with open ('jmap.html') as index:
+			with open ('index.html') as index:
 				self.send_response(200)
 				self.send_header('Content-type','text/html')
 				self.end_headers()
