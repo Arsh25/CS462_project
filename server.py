@@ -13,6 +13,7 @@ import argparse
 import socket
 from datetime import datetime
 from geoip import geolite2
+from os import curdir, sep
 
 
 import log_parser
@@ -91,7 +92,7 @@ class web_logger_handler(BaseHTTPServer.BaseHTTPRequestHandler):
 							 <br> </h1><a href="/">Home Page</a> </body></html>')
 			self.wfile.close()
 			server_log.close()
-			
+
 		if sendReply == True:
 			#Open the static file requested and send it
 			f = open(curdir + sep + self.path) 
