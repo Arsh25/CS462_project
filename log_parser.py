@@ -21,17 +21,20 @@ def parse_auth_log(fileName):
 				user = line[line.find("for")+3:line.find("from")]
 				ip = line[line.find("from")+4:line.find("port")]
 				invalid_user  = line.find("invalid user")
+				user = line[line.find('for')+4:line.find('from')-1]
 				if invalid_user != -1: # Find invalid users that attackers tried to login as
 					invalid_username = line[invalid_user+len("invalid user"):line.find("from")]
 					invalid_users.append(invalid_username)
-				attacks.append(ip)
+				time_stamp = line[0:15]
+				entry = {'time_stamp':time_stamp,'ip':ip,'user':user}
+				attacks.append(entry)
 		return attacks, invalid_users
 
-def get_unique_ips(ip_array):
+def get_unique_ips(attacks):
 	unique_ips = []
-	for ip in ip_array:
-		if ip not in unique_ips:
-			unique_ips.append(ip)
+	for entry in attacks:
+		if entry['ip'].strip() not in unique_ips:
+		 	unique_ips.append(entry['ip'].strip())
 	return unique_ips;
 
 # Pre: user_array is an array 
@@ -80,28 +83,28 @@ if __name__ == '__main__':
 	
 	# UNCOMMENT TO SEE RAW DATA. WILL SPEW LOTS OF TEXT TO SCREEN
 	
-	# print("Printing all IP's found with failed SSH logins")
-	# print(ssh_attacks)
+	#print("Printing all IP's found with failed SSH logins")
+	#print(ssh_attacks)
 	# print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 	# print("Printing all invalid users found with failed SSH logins")
 	# print(invalid_users)
-	print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-	print("Printing Unique IP's")
+	# print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+	# print("Printing Unique IP's")
 	unique_ips = get_unique_ips(ssh_attacks)
 	print(unique_ips)
-	print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-	print("Sorting usernames found by number of times seen in file")
-	sorted_invalid_users = count_invalid_users(invalid_users)
-	print(sorted_invalid_users)
-	print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-	print("Sorting IP's found by number of times seen in file")
-	sorted_ips = sort_ips(ssh_attacks)
-	print(sorted_ips)
-	print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-	print("Printing top 10 usernames")
-	top_usernames = get_top(sorted_invalid_users,10)
-	print(top_usernames)
-	print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-	print("Printing top 10 IP's")
-	top_ips = get_top(sorted_ips,10)
-	print(top_ips)
+	# print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+	# print("Sorting usernames found by number of times seen in file")
+	# sorted_invalid_users = count_invalid_users(invalid_users)
+	# print(sorted_invalid_users)
+	# print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+	# print("Sorting IP's found by number of times seen in file")
+	# sorted_ips = sort_ips(ssh_attacks)
+	# print(sorted_ips)
+	# print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+	# print("Printing top 10 usernames")
+	# top_usernames = get_top(sorted_invalid_users,10)
+	# print(top_usernames)
+	# print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+	# print("Printing top 10 IP's")
+	# top_ips = get_top(sorted_ips,10)
+	# print(top_ips)
