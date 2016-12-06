@@ -11,7 +11,6 @@ body {
     margin: 0 auto;
 }
 table {
-	/*float:center;*/
     width: 28%;
 }
 #top-ips {
@@ -33,12 +32,8 @@ tr:nth-child(1) {
 	background: #2BAEEB
 }
 #map {
-	/*width: calc(100% - 160px);*/
-	/*height: calc(100% - 160px);*/
 	width:90%;
 	height:90%;
 	padding: 5% 0 0 5%;
 	margin-bottom:50px;
 }
-/*table { border: 1px solid black;float:left;width:148px;}*/
- /*#table_container{width:300px;margin:0 auto;}*/

@@ -87,7 +87,9 @@ function getDataFromServer(){
             var data = xmlHttp.responseText;
             for(var obj in data) {
                 attack = JSON.parse(obj);
-                addMarkerToMap(attack["lat"],attack["long"],attack["time_stamp"]+" - "attack["user"]+":"attack["ip"]);
+                var msg = attack["time_stamp"];
+                var msg = msg.concat(" - ",attack["user"],":",attack["ip"]);
+                addMarkerToMap(attack["lat"],attack["long"],msg);
                 userCount[attack["user"]]++;
                 ipCount[attack["ip"]]++;
             }
