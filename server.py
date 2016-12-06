@@ -95,7 +95,7 @@ class web_logger_handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 		if sendReply == True:
 			#Open the static file requested and send it
-			f = open(curdir + sep + self.path) 
+			f = open(self.path) 
 			self.send_response(200)
 			self.send_header('Content-type',mimetype)
 			self.end_headers()
