@@ -11,6 +11,7 @@ import json
 import threading
 import argparse
 from datetime import datetime
+from geoip import geolite2
 
 
 import log_parser
@@ -18,10 +19,16 @@ import log_parser
 #FIXME: Clean up timer on KeyboardInterrupt 
 def parse_auth_log(log_file,seconds):
 		#ip_addresses, invalid_users = log_parser.parse_auth_log("/var/log/auth.log")
-		ip_addresses, invalid_users = log_parser.parse_auth_log(log_file)
-		with open('auth_log_ips','a') as ip_file:
-			for ip in ip_addresses:
-				ip_file.write(ip+'\n')			
+		attacks, invalid_users = log_parser.parse_auth_log(log_file)
+		with open('auth_log_ips','a+r') as ip_file:
+			for attack in attacks:
+				if attack not in ip_file:
+					ip = attack['ip'].strip()
+					ip = "'"+ip+"'"
+					#print(ip)
+					geo_data = geolite2.lookup(ip)
+					print(geo_data)
+					ip_file.write(str(attack)+'\n')			
 		ip_file.closed
 		with open('logs/update.log','a') as parser_log:
 			parser_log.write("Ran parse_auth_log at: " + str(datetime.now())+'\n')
@@ -41,7 +48,7 @@ class web_logger_handler(BaseHTTPServer.BaseHTTPRequestHandler):
 				self.wfile.close()
 		elif self.path == '/live':
 			self.send_response(200)
-			self.send_header('Content-type','text/html')
+			self.send_header('Content-type','application/json')
 			self.end_headers()
 			with open('auth_log_ips','r') as ip_file:
 				ip_addresses = ip_file.read().splitlines()
@@ -49,7 +56,18 @@ class web_logger_handler(BaseHTTPServer.BaseHTTPRequestHandler):
 				response = list(unique_ips) # Convert unique IP's set back to list
 				self.wfile.write(json.dumps(response))
 				self.wfile.close()
-			ip_file.closed
+		elif self.path == '/topip':
+			with open('auth_log_ips','r') as ip_file:
+				ip_addresses = ip_file.read().splitlines()
+				sorted_ips = log_parser.sort_ips(ip_addresses)
+				print(sorted_ips)
+				top_10_ips = log_parser.get_top(sorted_ips,10)
+				self.send_response(200)
+				self.send_header('Content-type','application/json')
+				self.end_headers()
+				#print(top_10_ips)
+				self.wfile.write(json.dumps(top_10_ips))
+				self.wfile.close()
 		else:
 			server_log = open('logs/server.log','a')
 			server_log.write("Invalid URL visited: "+self.path+"\n");
