@@ -42,6 +42,7 @@ def parse_auth_log(log_file,seconds):
 class web_logger_handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 	def do_GET(self):
+		sendReply = False
 		if self.path =='/':
 			with open ('index.html') as index:
 				self.send_response(200)
@@ -71,6 +72,13 @@ class web_logger_handler(BaseHTTPServer.BaseHTTPRequestHandler):
 				#print(top_10_ips)
 				self.wfile.write(json.dumps(top_10_ips))
 				self.wfile.close()
+		elif self.path.endswith(".js"):
+			mimetype='application/javascript'
+			sendReply = True
+		elif self.path.endswith(".css"):
+			mimetype='text/css'
+			sendReply = True
+
 		else:
 			server_log = open('logs/server.log','a')
 			server_log.write("Invalid URL visited: "+self.path+"\n");
@@ -83,6 +91,15 @@ class web_logger_handler(BaseHTTPServer.BaseHTTPRequestHandler):
 							 <br> </h1><a href="/">Home Page</a> </body></html>')
 			self.wfile.close()
 			server_log.close()
+			
+		if sendReply == True:
+			#Open the static file requested and send it
+			f = open(curdir + sep + self.path) 
+			self.send_response(200)
+			self.send_header('Content-type',mimetype)
+			self.end_headers()
+			self.wfile.write(f.read())
+			f.close()
 
 
 	def do_POST(self):
