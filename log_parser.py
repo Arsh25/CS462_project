@@ -3,7 +3,7 @@
 # log_parser.py: Parse various Unix log files 
 # Arsh Chauhan
 # 11/10/2016
-# Last Edited: 12/04/2016
+# Last Edited: 12/05/2016
 
 # Pre: fileName is a valid auth.log file
 # Post: Returns
@@ -26,6 +26,13 @@ def parse_auth_log(fileName):
 					invalid_users.append(invalid_username)
 				attacks.append(ip)
 		return attacks, invalid_users
+
+def get_unique_ips(ip_array):
+	unique_ips = []
+	for ip in ip_array:
+		if ip not in unique_ips:
+			unique_ips.append(ip)
+	return unique_ips;
 
 # Pre: user_array is an array 
 # Post: Returns
@@ -78,7 +85,10 @@ if __name__ == '__main__':
 	# print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 	# print("Printing all invalid users found with failed SSH logins")
 	# print(invalid_users)
-	
+	print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+	print("Printing Unique IP's")
+	unique_ips = get_unique_ips(ssh_attacks)
+	print(unique_ips)
 	print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 	print("Sorting usernames found by number of times seen in file")
 	sorted_invalid_users = count_invalid_users(invalid_users)
