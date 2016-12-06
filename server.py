@@ -14,6 +14,7 @@ import socket
 from datetime import datetime
 from geoip import geolite2
 from os import curdir, sep
+import cPickle as pickle
 
 
 import log_parser
@@ -23,17 +24,39 @@ def parse_auth_log(log_file,seconds):
 		#ip_addresses, invalid_users = log_parser.parse_auth_log("/var/log/auth.log")
 		attacks, invalid_users = log_parser.parse_auth_log(log_file)
 		with open('auth_log_ips','a+r') as ip_file:
+			attacks_list=[]
+			current_attacks = ip_file.read().splitlines()
 			for attack in attacks:
-				if attack not in ip_file:
+				if attack not in current_attacks:
 					ip = attack['ip'].strip()
 					# ip = "'"+ip+"'"
 					if ip != '':
 						socket.inet_aton(ip)
 						#print(ip)
 						geo_data = geolite2.lookup(ip)
-						# print(geo_data)
-						ip_file.write(str(attack)+'\n')			
+						if geo_data is not None:
+							attack["lat"] = geo_data.location[0]
+							attack["long"] = geo_data.location[1]
+						attacks_list.append(attack)
+					ip_file.write(str(attacks_list))	
 		ip_file.closed
+		unique_ips = log_parser.get_unique_ips(attacks)
+		with open('unique_ips_file','a+r+b') as unique_ips_file:
+			current_unique_ips = unique_ips_file.read().splitlines()
+			for ip in unique_ips:
+				entry={'ip':ip}
+				if ip != '':
+					socket.inet_aton(ip)
+					#print(ip)
+					geo_data = geolite2.lookup(ip)
+					if geo_data is not None:
+						entry["lat"] = geo_data.location[0]
+						entry["long"] = geo_data.location[1]
+				if entry not in current_unique_ips:
+						unique_ips_file.write(str(entry)+'\n')
+				else:
+					print("Found " +str(entry) +" in current_unique_ips")
+
 		with open('logs/update.log','a') as parser_log:
 			parser_log.write("Ran parse_auth_log at: " + str(datetime.now())+'\n')
 		parser_log.closed
@@ -51,14 +74,16 @@ class web_logger_handler(BaseHTTPServer.BaseHTTPRequestHandler):
 				self.wfile.write(index.read())
 				self.wfile.close()
 		elif self.path == '/live':
+			entries = []
 			self.send_response(200)
 			self.send_header('Content-type','application/json')
 			self.end_headers()
 			with open('auth_log_ips','r') as ip_file:
-				ip_addresses = ip_file.read().splitlines()
-				unique_ips = set(ip_addresses) #Convert list to set to get unique IP's
-				response = list(unique_ips) # Convert unique IP's set back to list
-				self.wfile.write(json.dumps(response))
+				for entry in ip_file:
+					entries.append(entry)
+				# response = set(entries)
+				# response = list(response)
+				self.wfile.write(json.dumps(entries))
 				self.wfile.close()
 		elif self.path == '/topip':
 			with open('auth_log_ips','r') as ip_file:
@@ -69,7 +94,6 @@ class web_logger_handler(BaseHTTPServer.BaseHTTPRequestHandler):
 				self.send_response(200)
 				self.send_header('Content-type','application/json')
 				self.end_headers()
-				#print(top_10_ips)
 				self.wfile.write(json.dumps(top_10_ips))
 				self.wfile.close()
 		elif self.path.endswith('scripts.js'):
