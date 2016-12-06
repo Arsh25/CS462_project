@@ -1,111 +1,29 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Simple Map</title>
-    <meta name="viewport" content="initial-scale=1.0">
-    <meta charset="utf-8">
-    <style>
-      /* Always set the map height explicitly to define the size of the div
-       * element that contains the map. */
-      #map {
-        height: 50%;
-      }
-      /* Optional: Makes the sample page fill the window. */
-      html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="map"></div>
-    <script>
-      var map;
-      var markerCount;
-      function initMap() {
-        map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: 21.472934, lng: -170.877310},
-          zoom: 2
-        });
-      }
-
-      // function addMarkerToMap(lat, long){
-	function addMarkerToMap(lat, long, htmlMarkupForInfoWindow){
-	    var infowindow = new google.maps.InfoWindow();
-	    var myLatLng = new google.maps.LatLng(lat, long);
-	    var marker = new google.maps.Marker({
-	        position: myLatLng,
-	        map: map,
-	        animation: google.maps.Animation.DROP,
-	    });
-	    
-	    //Gives each marker an Id for the on click
-	    markerCount++;
-
-	    //Creates the event listener for clicking the marker
-	    //and places the marker on the map 
-	    google.maps.event.addListener(marker, 'click', (function(marker, markerCount) {
-	        return function() {
-	            infowindow.setContent(htmlMarkupForInfoWindow);
-	            infowindow.open(map, marker);
-	        }
-	    })(marker, markerCount));  
-	    
-	    //Pans map to the new location of the marker
-	    // map.panTo(myLatLng)        
-	}
-
-	function httpGetAsync(theUrl,ip){
-		var xmlHttp = new XMLHttpRequest();
-		xmlHttp.onreadystatechange = function(){
-			if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
-				var json = xmlHttp.responseText;
-				var obj = JSON.parse(json);
-				addMarkerToMap(obj['latitude'],obj['longitude'],ip);
-			}
+<head>
+	<title>Simple Map</title>
+	<meta name="viewport" content="initial-scale=1.0">
+	<meta charset="utf-8">
+	<style>
+		#map {
+			height: 100%;
+			width: 100%;
 		}
-		xmlHttp.open("GET", theUrl, true);
-		xmlHttp.send(null);
-	}
-
-	function parseIPs(){
-		var ip_pattern = new RegExp("(?:[0-9]{1,3}\.){3}[0-9]{1,3}$");
-		var textArea = document.getElementById('ip-entry').value;
-		var lines = textArea.split('\n');
-		for (var i = 0; i < lines.length; i++){
-			if (ip_pattern.test(lines[i])){
-				httpGetAsync("https://freegeoip.net/json/"+lines[i],lines[i])
-			} else {
-				console.log("Didn't recognize "+lines[i]+" as a valid IP address.")
-			}
+		html, body {
+			height: 100%;
+			margin: 0;
+			padding: 0;
 		}
-	}
-
-	function getDataFromServer()
-	{
-		var req = new XMLHttpRequest();
-		req.onreadystatechange = function()
-		{
-			if (req.readyState == 4 && req.status == 200)
-			{
-				var ip_addresses = JSON.parse(req.responseText);
-				for (var i=0;i<ip_addresses.length;i++)
-				{	
-						ip_addresses[i] = ip_addresses[i].trim();
-						document.getElementById('ip-entry').value += '\n'+ip_addresses[i];
-				}
-			}
-		}
-		req.open("GET","live",true);
-		req.send(null);
-	}
-
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhnrIGWrpbVrXScHPEg_nQ8TlwB7Ego0E&callback=initMap"
-    async defer></script>
-    Use <pre>sudo grep "Failed password" /var/log/auth.log|sed 's/.*\([0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\).*/\1/'|sort|uniq</pre> to extract IPs from your auth.log<br>
-    Paste the output in this textbox and press Process IPs<br>
+	</style>
+</head>
+<body>
+	<div id="map"></div>
+	<script src="scripts.js">
+	</script>
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhnrIGWrpbVrXScHPEg_nQ8TlwB7Ego0E&callback=initMap"
+	async defer></script>
+	Use <pre>sudo grep "Failed password" /var/log/auth.log|sed 's/.*\([0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\).*/\1/'|sort|uniq</pre> to extract IPs from your auth.log<br>
+	Paste the output in this textbox and press Process IPs<br>
 	<textarea name="ip-entry" id="ip-entry" cols="15" rows="10" value="8.8.8.8"></textarea><br>
 	<button id="processIPs">Process IPs</button>
 	<button id="getLiveData">Get Live data from server</button>
@@ -113,5 +31,5 @@
 		document.getElementById('processIPs').addEventListener('click',function(){parseIPs()});
 		document.getElementById('getLiveData').addEventListener('click',getDataFromServer);
 	</script>
-  </body>
+</body>
 </html>
