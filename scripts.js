@@ -8,7 +8,7 @@ function initMap() {
         navigationControl: false,
         mapTypeControl: false,
         scaleControl: false,
-        draggable: false,
+        // draggable: false,
         streetViewControl: false,
         zoomControl: false,
     });

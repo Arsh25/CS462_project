@@ -5,14 +5,38 @@
 	<meta name="viewport" content="initial-scale=1.0">
 	<meta charset="utf-8">
 	<style>
-		#map {
-			height: 100%;
-			width: 100%;
-		}
 		html, body {
 			height: 100%;
 			margin: 0;
 			padding: 0;
+		}
+		body {
+			bottom-margin: 100px;
+		}
+		table {
+		    width: 40%;
+		    float: center;
+		    margin: 0 auto;
+		    
+		}
+		td, tr, th {
+	        text-align: center;
+	        padding: 10px 5px;
+	    }
+	    /*tr:nth-child:(even) {
+	    	background: #B5E8FF;
+	    }*/
+	    tr:nth-child(odd) {
+	    	background: #B5E8FF
+	    }
+	    tr:nth-child(1) {
+	    	background: #2BAEEB
+	    }
+	    #map {
+			width: calc(100% - 160px);
+			height: calc(100% - 160px);
+			padding: 80px 0 0 80px;
+			margin-bottom:80px;
 		}
 	</style>
 </head>
@@ -27,6 +51,22 @@
 	<textarea name="ip-entry" id="ip-entry" cols="15" rows="10" value="8.8.8.8"></textarea><br>
 	<button id="processIPs">Process IPs</button>
 	<button id="getLiveData">Get Live data from server</button>
+	<div class="tables">
+		<table id="top-ips">
+			<tr bgcolor="#2BAEEB">
+				<th>#</th>
+				<th>IP</th>
+			</tr>
+		</table>
+		<br><br>
+		<table id="top-users">
+			<tr bgcolor="#2BAEEB">
+				<th>#</th>
+				<th>username</th>
+			</tr>
+		</table>
+	</div>
+	
 	<script>
 		document.getElementById('processIPs').addEventListener('click',function(){parseIPs()});
 		document.getElementById('getLiveData').addEventListener('click',getDataFromServer);
