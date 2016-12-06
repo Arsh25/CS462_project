@@ -30,7 +30,7 @@ def parse_auth_log(log_file,seconds):
 						socket.inet_aton(ip)
 						#print(ip)
 						geo_data = geolite2.lookup(ip)
-						print(geo_data)
+						# print(geo_data)
 						ip_file.write(str(attack)+'\n')			
 		ip_file.closed
 		with open('logs/update.log','a') as parser_log:
@@ -94,7 +94,7 @@ class web_logger_handler(BaseHTTPServer.BaseHTTPRequestHandler):
 if __name__ == '__main__':
 	cli_args = argparse.ArgumentParser(description='Parse common *nix logs and map on a webpage')
 	cli_args.add_argument('--timer',dest='timer_sec',type=int,help='Parse log file every --timer seconds',default=300)
-	cli_args.add_argument('--port',dest='port',type=int,help='Port to run this server',default=8080)
+	cli_args.add_argument('--port',dest='port',type=int,help='Port to run this server',default=9000)
 	cli_args.add_argument('--log',dest='log_file',type=str,help='File to parse as auth.log',default='logs/auth.log')
 	args = cli_args.parse_args()
 
