@@ -1,7 +1,7 @@
 var map;
-var markerCount;
-var userCount;
-var ipCount;
+var markerCount=0;
+var userCount=0;
+var ipCount=0;
 
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
@@ -85,19 +85,18 @@ function getDataFromServer(){
             // lat
             // long
             var data = xmlHttp.responseText;
-            for(var obj in data) {
-                attack = JSON.parse(obj);
-                var msg = attack["time_stamp"];
-                var msg = msg.concat(" - ",attack["user"],":",attack["ip"]);
+            data = JSON.parse(data);
+            for(var i=0;i<data.length;i++) {
+                attack = data[i];
+                msg = attack['ip']
                 addMarkerToMap(attack["lat"],attack["long"],msg);
-                userCount[attack["user"]]++;
                 ipCount[attack["ip"]]++;
             }
             populateTables();
         }
     }
     xmlHttp.open("GET","live",true);
-    xmlHttp.send(null);
+    xmlHttp.send();
 }
 
 // function httpGetAsync(theUrl,ip){
