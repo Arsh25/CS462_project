@@ -3,7 +3,7 @@
 # lserver.py: Web server for log visualization project 
 # Arsh Chauhan 
 #11/29/2016
-# Last Edited: 12/5/2016
+# Last Edited: 12/6/2016
 
 import SimpleHTTPServer
 import BaseHTTPServer
@@ -11,51 +11,43 @@ import json
 import threading
 import argparse
 import socket
+import sqlite3
 from datetime import datetime
 from geoip import geolite2
-from os import curdir, sep
-import cPickle as pickle
-
 
 import log_parser
 
+def create_database(database):
+	try:
+		db_conn = sqlite3.connect(database)
+		db_conn.execute("CREATE TABLE {tn} ({nf} {ft})"\
+			.format(tn='attacks',nf='ip_address',ft='TEXT'))
+		db_conn.execute("ALTER TABLE attacks ADD COLUMN time_stamp TEXT")
+		db_conn.execute("ALTER TABLE attacks ADD COLUMN user TEXT")
+		db_conn.execute("ALTER TABLE attacks ADD COLUMN lat TEXT")
+		db_conn.execute("ALTER TABLE attacks ADD COLUMN long TEXT")
+		db_conn.commit()
+	except sqlite3.OperationalError as e:
+		print (e)
+
 #FIXME: Clean up timer on KeyboardInterrupt 
+#FIXME: DO not insert already existing record in db
 def parse_auth_log(log_file,seconds):
 		#ip_addresses, invalid_users = log_parser.parse_auth_log("/var/log/auth.log")
 		attacks, invalid_users = log_parser.parse_auth_log(log_file)
-		with open('auth_log_ips','a+r') as ip_file:
-			attacks_list=[]
-			current_attacks = ip_file.read().splitlines()
-			for attack in attacks:
-				if attack not in current_attacks:
-					ip = attack['ip'].strip()
-					# ip = "'"+ip+"'"
-					if ip != '':
-						socket.inet_aton(ip)
-						#print(ip)
-						geo_data = geolite2.lookup(ip)
-						if geo_data is not None:
-							attack["lat"] = geo_data.location[0]
-							attack["long"] = geo_data.location[1]
-						attacks_list.append(attack)
-					ip_file.write(str(attacks_list))	
-		ip_file.closed
-		unique_ips = log_parser.get_unique_ips(attacks)
-		with open('unique_ips_file','a+r+b') as unique_ips_file:
-			current_unique_ips = unique_ips_file.read().splitlines()
-			for ip in unique_ips:
-				entry={'ip':ip}
-				if ip != '':
-					socket.inet_aton(ip)
-					#print(ip)
-					geo_data = geolite2.lookup(ip)
-					if geo_data is not None:
-						entry["lat"] = geo_data.location[0]
-						entry["long"] = geo_data.location[1]
-				if entry not in current_unique_ips:
-						unique_ips_file.write(str(entry)+'\n')
-				else:
-					print("Found " +str(entry) +" in current_unique_ips")
+		db_conn = sqlite3.connect("attacks.sqlite")
+		for attack in attacks:
+			entry={'ip':attack["ip"],'time_stamp':attack['time_stamp'],'user':attack['user']}
+			ip = attack["ip"].strip()
+			if ip != '':
+				socket.inet_aton(ip)
+				geo_data = geolite2.lookup(ip)
+				if geo_data is not None:
+					entry["lat"] = geo_data.location[0]
+					entry["long"] = geo_data.location[1]
+					db_conn.execute("INSERT INTO attacks (ip_address,time_stamp,user,lat,long) VALUES (?,?,?,?,?)", \
+					(entry["ip"],entry["time_stamp"],entry["user"],str(entry["lat"]),str(entry["long"])))
+		db_conn.commit()
 
 		with open('logs/update.log','a') as parser_log:
 			parser_log.write("Ran parse_auth_log at: " + str(datetime.now())+'\n')
@@ -74,28 +66,21 @@ class web_logger_handler(BaseHTTPServer.BaseHTTPRequestHandler):
 				self.wfile.write(index.read())
 				self.wfile.close()
 		elif self.path == '/live':
-			entries = []
-			self.send_response(200)
+			db_conn = sqlite3.connect("attacks.sqlite")
+			db_conn.row_factory = sqlite3.Row
+			db = db_conn.cursor()
+			rows = db.execute('''SELECT * FROM attacks GROUP BY ip_address''').fetchall()
+			db_conn.commit()
+			db_conn.close()
+			response = []
+			for entry in rows:
+					response.append({'ip':entry['ip_address'],'lat':entry['lat'],'long':entry['long']})
 			self.send_header('Content-type','application/json')
 			self.end_headers()
-			with open('auth_log_ips','r') as ip_file:
-				for entry in ip_file:
-					entries.append(entry)
-				# response = set(entries)
-				# response = list(response)
-				self.wfile.write(json.dumps(entries))
-				self.wfile.close()
+			self.wfile.write(json.dumps(response))
+			self.wfile.close()
 		elif self.path == '/topip':
-			with open('auth_log_ips','r') as ip_file:
-				ip_addresses = ip_file.read().splitlines()
-				sorted_ips = log_parser.sort_ips(ip_addresses)
-				print(sorted_ips)
-				top_10_ips = log_parser.get_top(sorted_ips,10)
-				self.send_response(200)
-				self.send_header('Content-type','application/json')
-				self.end_headers()
-				self.wfile.write(json.dumps(top_10_ips))
-				self.wfile.close()
+			print ("Work in Progress")
 		elif self.path.endswith('scripts.js'):
 			with open ('scripts.js') as scripts:
 				self.send_response(200)
@@ -138,6 +123,7 @@ if __name__ == '__main__':
 	cli_args.add_argument('--log',dest='log_file',type=str,help='File to parse as auth.log',default='logs/auth.log')
 	args = cli_args.parse_args()
 
+	create_database("attacks.sqlite")
 	parse_auth_log(args.log_file,args.timer_sec)
 	handler = web_logger_handler
 	serverAddress = ('',args.port)
