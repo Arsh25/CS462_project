@@ -26,7 +26,11 @@ def parse_auth_log(fileName):
 					invalid_username = line[invalid_user+len("invalid user"):line.find("from")]
 					invalid_users.append(invalid_username)
 				time_stamp = line[0:15]
-				entry = {'time_stamp':time_stamp,'ip':ip,'user':user}
+				entry = {'time_stamp':time_stamp,'ip':ip}
+				if invalid_user !=-1:
+					entry['user']=invalid_username.strip()
+				else:
+					entry['user']=user
 				attacks.append(entry)
 		return attacks, invalid_users
 
@@ -90,8 +94,8 @@ if __name__ == '__main__':
 	# print(invalid_users)
 	# print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 	# print("Printing Unique IP's")
-	unique_ips = get_unique_ips(ssh_attacks)
-	print(unique_ips)
+	# unique_ips = get_unique_ips(ssh_attacks)
+	# print(unique_ips)
 	# print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 	# print("Sorting usernames found by number of times seen in file")
 	# sorted_invalid_users = count_invalid_users(invalid_users)
