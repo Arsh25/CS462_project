@@ -30,8 +30,7 @@ def create_database(database):
 	except sqlite3.OperationalError as e:
 		print (e)
 
-#FIXME: Clean up timer on KeyboardInterrupt 
-#FIXME: DO not insert already existing record in db
+#FIXME: Clean up timer on KeyboardInterrupt
 def parse_auth_log(log_file,seconds):
 		#ip_addresses, invalid_users = log_parser.parse_auth_log("/var/log/auth.log")
 		attacks, invalid_users = log_parser.parse_auth_log(log_file)
@@ -45,8 +44,12 @@ def parse_auth_log(log_file,seconds):
 				if geo_data is not None:
 					entry["lat"] = geo_data.location[0]
 					entry["long"] = geo_data.location[1]
-					db_conn.execute("INSERT INTO attacks (ip_address,time_stamp,user,lat,long) VALUES (?,?,?,?,?)", \
-					(entry["ip"],entry["time_stamp"],entry["user"],str(entry["lat"]),str(entry["long"])))
+					#Check if this entry exists in the DB
+					entry_exists = db_conn.execute("SELECT * from attacks where ip_address = ? \
+						AND time_stamp = ?",(entry["ip"],entry["time_stamp"])).fetchall()
+					if len(entry_exists) == 0: # If does not exist, add to DB
+						db_conn.execute("INSERT INTO attacks (ip_address,time_stamp,user,lat,long) VALUES (?,?,?,?,?)", \
+						(entry["ip"],entry["time_stamp"],entry["user"],str(entry["lat"]),str(entry["long"])))
 		db_conn.commit()
 
 		with open('logs/update.log','a') as parser_log:
