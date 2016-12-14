@@ -14,6 +14,7 @@ function initMap() {
         // draggable: false,
         streetViewControl: false,
         zoomControl: false,
+        disableDoubleClickZoom: true,
     });
 }
 
